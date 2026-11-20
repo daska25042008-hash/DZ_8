@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 enum AccountType
 {
     Current = 1,
@@ -23,7 +24,7 @@ class BankTransaction
         return amount;
     }
 }
-class Account
+class Account : IDisposable
 {
     private static int count = 0;
     private int num;
@@ -94,6 +95,17 @@ class Account
             Console.WriteLine(transaction.GetDate() + " " + transaction.GetAmount());
         }
     }
+    public void Dispose()
+    {
+        using (StreamWriter writer = new StreamWriter("Account_" + num + "_transactions.txt"))
+        {
+            foreach (BankTransaction transaction in transactions)
+            {
+                writer.WriteLine(transaction.GetDate() + " " + transaction.GetAmount());
+            }
+        }
+        GC.SuppressFinalize(this);
+    }
     public int GetNum()
     {
         return num;
@@ -121,5 +133,7 @@ class Program
         a.ShowTransactions();
         Console.WriteLine("Операции счета b:");
         b.ShowTransactions();
+        a.Dispose();
+        b.Dispose();
     }
 }
